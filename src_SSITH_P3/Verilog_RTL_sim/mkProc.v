@@ -6,8 +6,8 @@
 //
 // Ports:
 // Name                         I/O  size props
-// RDY_hart0_server_reset_request_put  O     1 reg
-// RDY_hart0_server_reset_response_get  O     1 reg
+// RDY_init_server_request_put    O     1 reg
+// RDY_init_server_response_get   O     1 reg
 // RDY_start                      O     1
 // master0_awvalid                O     1
 // master0_awid                   O     4 reg
@@ -125,7 +125,6 @@
 // master1_rlast                  I     1 reg
 // m_external_interrupt_req_set_not_clear  I     1
 // s_external_interrupt_req_set_not_clear  I     1
-// debug_external_interrupt_req_set_not_clear  I     1
 // non_maskable_interrupt_req_set_not_clear  I     1 unused
 // set_verbosity_verbosity        I     4
 // debug_module_mem_server_awvalid  I     1
@@ -162,8 +161,8 @@
 // hart0_fpr_mem_server_request_put  I    70 reg
 // hart0_csr_mem_server_request_put  I    77 reg
 // hart0_put_other_req_put        I     4
-// EN_hart0_server_reset_request_put  I     1
-// EN_hart0_server_reset_response_get  I     1
+// EN_init_server_request_put     I     1
+// EN_init_server_response_get    I     1
 // EN_start                       I     1
 // EN_set_verbosity               I     1
 // EN_hart0_run_halt_server_request_put  I     1
@@ -200,11 +199,11 @@
 module mkProc(CLK,
 	      RST_N,
 
-	      EN_hart0_server_reset_request_put,
-	      RDY_hart0_server_reset_request_put,
+	      EN_init_server_request_put,
+	      RDY_init_server_request_put,
 
-	      EN_hart0_server_reset_response_get,
-	      RDY_hart0_server_reset_response_get,
+	      EN_init_server_response_get,
+	      RDY_init_server_response_get,
 
 	      start_startpc,
 	      start_tohostAddr,
@@ -364,8 +363,6 @@ module mkProc(CLK,
 
 	      s_external_interrupt_req_set_not_clear,
 
-	      debug_external_interrupt_req_set_not_clear,
-
 	      non_maskable_interrupt_req_set_not_clear,
 
 	      set_verbosity_verbosity,
@@ -474,13 +471,13 @@ module mkProc(CLK,
   input  CLK;
   input  RST_N;
 
-  // action method hart0_server_reset_request_put
-  input  EN_hart0_server_reset_request_put;
-  output RDY_hart0_server_reset_request_put;
+  // action method init_server_request_put
+  input  EN_init_server_request_put;
+  output RDY_init_server_request_put;
 
-  // action method hart0_server_reset_response_get
-  input  EN_hart0_server_reset_response_get;
-  output RDY_hart0_server_reset_response_get;
+  // action method init_server_response_get
+  input  EN_init_server_response_get;
+  output RDY_init_server_response_get;
 
   // action method start
   input  [63 : 0] start_startpc;
@@ -723,9 +720,6 @@ module mkProc(CLK,
   // action method s_external_interrupt_req
   input  s_external_interrupt_req_set_not_clear;
 
-  // action method debug_external_interrupt_req
-  input  debug_external_interrupt_req_set_not_clear;
-
   // action method non_maskable_interrupt_req
   input  non_maskable_interrupt_req_set_not_clear;
 
@@ -926,8 +920,8 @@ module mkProc(CLK,
        RDY_hart0_put_other_req_put,
        RDY_hart0_run_halt_server_request_put,
        RDY_hart0_run_halt_server_response_get,
-       RDY_hart0_server_reset_request_put,
-       RDY_hart0_server_reset_response_get,
+       RDY_init_server_request_put,
+       RDY_init_server_response_get,
        RDY_set_verbosity,
        RDY_start,
        RDY_v_to_TV_0_get,
@@ -1427,6 +1421,8 @@ module mkProc(CLK,
        core_0$EN_iCacheToParent_fromP_enq,
        core_0$EN_iCacheToParent_rqToP_deq,
        core_0$EN_iCacheToParent_rsToP_deq,
+       core_0$EN_init_server_request_put,
+       core_0$EN_init_server_response_get,
        core_0$EN_mmioToPlatform_cRq_deq,
        core_0$EN_mmioToPlatform_cRs_deq,
        core_0$EN_mmioToPlatform_pRq_enq,
@@ -1435,7 +1431,6 @@ module mkProc(CLK,
        core_0$EN_recvDoStats,
        core_0$EN_renameDebug_renameErr_get,
        core_0$EN_sendDoStats,
-       core_0$EN_setDEIP,
        core_0$EN_setMEIP,
        core_0$EN_setSEIP,
        core_0$EN_tlbToMem_memReq_deq,
@@ -1470,6 +1465,8 @@ module mkProc(CLK,
        core_0$RDY_iCacheToParent_rqToP_first,
        core_0$RDY_iCacheToParent_rsToP_deq,
        core_0$RDY_iCacheToParent_rsToP_first,
+       core_0$RDY_init_server_request_put,
+       core_0$RDY_init_server_response_get,
        core_0$RDY_mmioToPlatform_cRq_deq,
        core_0$RDY_mmioToPlatform_cRq_first,
        core_0$RDY_mmioToPlatform_cRs_deq,
@@ -1489,7 +1486,6 @@ module mkProc(CLK,
        core_0$mmioToPlatform_cRs_first,
        core_0$recvDoStats_x,
        core_0$sendDoStats,
-       core_0$setDEIP_v,
        core_0$setMEIP_v,
        core_0$setSEIP_v;
 
@@ -1509,19 +1505,19 @@ module mkProc(CLK,
        enqDst_1_0_dummy2_1$EN,
        enqDst_1_0_dummy2_1$Q_OUT;
 
-  // ports of submodule f_reset_reqs
-  wire f_reset_reqs$CLR,
-       f_reset_reqs$DEQ,
-       f_reset_reqs$EMPTY_N,
-       f_reset_reqs$ENQ,
-       f_reset_reqs$FULL_N;
+  // ports of submodule f_init_reqs
+  wire f_init_reqs$CLR,
+       f_init_reqs$DEQ,
+       f_init_reqs$EMPTY_N,
+       f_init_reqs$ENQ,
+       f_init_reqs$FULL_N;
 
-  // ports of submodule f_reset_rsps
-  wire f_reset_rsps$CLR,
-       f_reset_rsps$DEQ,
-       f_reset_rsps$EMPTY_N,
-       f_reset_rsps$ENQ,
-       f_reset_rsps$FULL_N;
+  // ports of submodule f_init_rsps
+  wire f_init_rsps$CLR,
+       f_init_rsps$DEQ,
+       f_init_rsps$EMPTY_N,
+       f_init_rsps$ENQ,
+       f_init_rsps$FULL_N;
 
   // ports of submodule llc
   reg [644 : 0] llc$dma_memReq_enq_x;
@@ -1901,7 +1897,8 @@ module mkProc(CLK,
        CAN_FIRE_RL_rl_dummy7,
        CAN_FIRE_RL_rl_dummy8,
        CAN_FIRE_RL_rl_dummy9,
-       CAN_FIRE_RL_rl_reset,
+       CAN_FIRE_RL_rl_init_finish,
+       CAN_FIRE_RL_rl_init_start,
        CAN_FIRE_RL_rl_terminate,
        CAN_FIRE_RL_rl_tohost,
        CAN_FIRE_RL_sendPRq,
@@ -1912,7 +1909,6 @@ module mkProc(CLK,
        CAN_FIRE_RL_srcPropose_1,
        CAN_FIRE_RL_srcPropose_2,
        CAN_FIRE_RL_srcPropose_3,
-       CAN_FIRE_debug_external_interrupt_req,
        CAN_FIRE_debug_module_mem_server_m_arvalid,
        CAN_FIRE_debug_module_mem_server_m_awvalid,
        CAN_FIRE_debug_module_mem_server_m_bready,
@@ -1927,8 +1923,8 @@ module mkProc(CLK,
        CAN_FIRE_hart0_put_other_req_put,
        CAN_FIRE_hart0_run_halt_server_request_put,
        CAN_FIRE_hart0_run_halt_server_response_get,
-       CAN_FIRE_hart0_server_reset_request_put,
-       CAN_FIRE_hart0_server_reset_response_get,
+       CAN_FIRE_init_server_request_put,
+       CAN_FIRE_init_server_response_get,
        CAN_FIRE_m_external_interrupt_req,
        CAN_FIRE_master0_m_arready,
        CAN_FIRE_master0_m_awready,
@@ -2020,7 +2016,8 @@ module mkProc(CLK,
        WILL_FIRE_RL_rl_dummy7,
        WILL_FIRE_RL_rl_dummy8,
        WILL_FIRE_RL_rl_dummy9,
-       WILL_FIRE_RL_rl_reset,
+       WILL_FIRE_RL_rl_init_finish,
+       WILL_FIRE_RL_rl_init_start,
        WILL_FIRE_RL_rl_terminate,
        WILL_FIRE_RL_rl_tohost,
        WILL_FIRE_RL_sendPRq,
@@ -2031,7 +2028,6 @@ module mkProc(CLK,
        WILL_FIRE_RL_srcPropose_1,
        WILL_FIRE_RL_srcPropose_2,
        WILL_FIRE_RL_srcPropose_3,
-       WILL_FIRE_debug_external_interrupt_req,
        WILL_FIRE_debug_module_mem_server_m_arvalid,
        WILL_FIRE_debug_module_mem_server_m_awvalid,
        WILL_FIRE_debug_module_mem_server_m_bready,
@@ -2046,8 +2042,8 @@ module mkProc(CLK,
        WILL_FIRE_hart0_put_other_req_put,
        WILL_FIRE_hart0_run_halt_server_request_put,
        WILL_FIRE_hart0_run_halt_server_response_get,
-       WILL_FIRE_hart0_server_reset_request_put,
-       WILL_FIRE_hart0_server_reset_response_get,
+       WILL_FIRE_init_server_request_put,
+       WILL_FIRE_init_server_response_get,
        WILL_FIRE_m_external_interrupt_req,
        WILL_FIRE_master0_m_arready,
        WILL_FIRE_master0_m_awready,
@@ -2127,7 +2123,7 @@ module mkProc(CLK,
 
   // declarations used by system tasks
   // synopsys translate_off
-  reg [31 : 0] v__h152458;
+  reg [31 : 0] v__h152604;
   reg [31 : 0] v__h4189;
   reg [31 : 0] v__h4362;
   reg [31 : 0] v__h4626;
@@ -2168,7 +2164,7 @@ module mkProc(CLK,
   reg [31 : 0] v__h143872;
   reg [31 : 0] v__h150567;
   reg [31 : 0] v__h151075;
-  reg [31 : 0] v__h152452;
+  reg [31 : 0] v__h152598;
   // synopsys translate_on
 
   // remaining internal signals
@@ -2250,7 +2246,7 @@ module mkProc(CLK,
 		IF_propDstData_1_0_lat_0_whas__163_THEN_propDs_ETC___d1168,
 		IF_propDstData_1_1_lat_0_whas__201_THEN_propDs_ETC___d1206,
 		data__h29436,
-		failed_testnum__h152501,
+		failed_testnum__h152647,
 		line_addr__h105593,
 		mem_req_rd_addr_araddr__h123863,
 		mem_req_wr_addr_awaddr__h137787,
@@ -2425,17 +2421,15 @@ module mkProc(CLK,
        x__h72715,
        x__h77786;
 
-  // action method hart0_server_reset_request_put
-  assign RDY_hart0_server_reset_request_put = f_reset_reqs$FULL_N ;
-  assign CAN_FIRE_hart0_server_reset_request_put = f_reset_reqs$FULL_N ;
-  assign WILL_FIRE_hart0_server_reset_request_put =
-	     EN_hart0_server_reset_request_put ;
+  // action method init_server_request_put
+  assign RDY_init_server_request_put = f_init_reqs$FULL_N ;
+  assign CAN_FIRE_init_server_request_put = f_init_reqs$FULL_N ;
+  assign WILL_FIRE_init_server_request_put = EN_init_server_request_put ;
 
-  // action method hart0_server_reset_response_get
-  assign RDY_hart0_server_reset_response_get = f_reset_rsps$EMPTY_N ;
-  assign CAN_FIRE_hart0_server_reset_response_get = f_reset_rsps$EMPTY_N ;
-  assign WILL_FIRE_hart0_server_reset_response_get =
-	     EN_hart0_server_reset_response_get ;
+  // action method init_server_response_get
+  assign RDY_init_server_response_get = f_init_rsps$EMPTY_N ;
+  assign CAN_FIRE_init_server_response_get = f_init_rsps$EMPTY_N ;
+  assign WILL_FIRE_init_server_response_get = EN_init_server_response_get ;
 
   // action method start
   assign RDY_start = mmioPlatform_state == 2'd0 ;
@@ -2668,10 +2662,6 @@ module mkProc(CLK,
   assign CAN_FIRE_s_external_interrupt_req = 1'd1 ;
   assign WILL_FIRE_s_external_interrupt_req = 1'd1 ;
 
-  // action method debug_external_interrupt_req
-  assign CAN_FIRE_debug_external_interrupt_req = 1'd1 ;
-  assign WILL_FIRE_debug_external_interrupt_req = 1'd1 ;
-
   // action method non_maskable_interrupt_req
   assign CAN_FIRE_non_maskable_interrupt_req = 1'd1 ;
   assign WILL_FIRE_non_maskable_interrupt_req = 1'd1 ;
@@ -2880,10 +2870,11 @@ module mkProc(CLK,
 		.mmioToPlatform_pRs_enq_x(core_0$mmioToPlatform_pRs_enq_x),
 		.mmioToPlatform_setTime_t(core_0$mmioToPlatform_setTime_t),
 		.recvDoStats_x(core_0$recvDoStats_x),
-		.setDEIP_v(core_0$setDEIP_v),
 		.setMEIP_v(core_0$setMEIP_v),
 		.setSEIP_v(core_0$setSEIP_v),
 		.tlbToMem_respLd_enq_x(core_0$tlbToMem_respLd_enq_x),
+		.EN_init_server_request_put(core_0$EN_init_server_request_put),
+		.EN_init_server_response_get(core_0$EN_init_server_response_get),
 		.EN_coreReq_start(core_0$EN_coreReq_start),
 		.EN_coreReq_perfReq(core_0$EN_coreReq_perfReq),
 		.EN_coreIndInv_perfResp(core_0$EN_coreIndInv_perfResp),
@@ -2915,7 +2906,6 @@ module mkProc(CLK,
 		.EN_renameDebug_renameErr_get(core_0$EN_renameDebug_renameErr_get),
 		.EN_setMEIP(core_0$EN_setMEIP),
 		.EN_setSEIP(core_0$EN_setSEIP),
-		.EN_setDEIP(core_0$EN_setDEIP),
 		.EN_hart0_run_halt_server_request_put(core_0$EN_hart0_run_halt_server_request_put),
 		.EN_hart0_run_halt_server_response_get(core_0$EN_hart0_run_halt_server_response_get),
 		.EN_hart0_gpr_mem_server_request_put(core_0$EN_hart0_gpr_mem_server_request_put),
@@ -2926,6 +2916,8 @@ module mkProc(CLK,
 		.EN_hart0_csr_mem_server_response_get(core_0$EN_hart0_csr_mem_server_response_get),
 		.EN_v_to_TV_0_get(core_0$EN_v_to_TV_0_get),
 		.EN_v_to_TV_1_get(core_0$EN_v_to_TV_1_get),
+		.RDY_init_server_request_put(core_0$RDY_init_server_request_put),
+		.RDY_init_server_response_get(core_0$RDY_init_server_response_get),
 		.RDY_coreReq_start(),
 		.RDY_coreReq_perfReq(),
 		.coreIndInv_perfResp(),
@@ -3006,7 +2998,6 @@ module mkProc(CLK,
 		.RDY_renameDebug_renameErr_get(core_0$RDY_renameDebug_renameErr_get),
 		.RDY_setMEIP(),
 		.RDY_setSEIP(),
-		.RDY_setDEIP(),
 		.RDY_hart0_run_halt_server_request_put(core_0$RDY_hart0_run_halt_server_request_put),
 		.hart0_run_halt_server_response_get(core_0$hart0_run_halt_server_response_get),
 		.RDY_hart0_run_halt_server_response_get(core_0$RDY_hart0_run_halt_server_response_get),
@@ -3048,23 +3039,23 @@ module mkProc(CLK,
 							      .EN(enqDst_1_0_dummy2_1$EN),
 							      .Q_OUT(enqDst_1_0_dummy2_1$Q_OUT));
 
-  // submodule f_reset_reqs
-  FIFO20 #(.guarded(32'd1)) f_reset_reqs(.RST(RST_N),
-					 .CLK(CLK),
-					 .ENQ(f_reset_reqs$ENQ),
-					 .DEQ(f_reset_reqs$DEQ),
-					 .CLR(f_reset_reqs$CLR),
-					 .FULL_N(f_reset_reqs$FULL_N),
-					 .EMPTY_N(f_reset_reqs$EMPTY_N));
+  // submodule f_init_reqs
+  FIFO20 #(.guarded(32'd1)) f_init_reqs(.RST(RST_N),
+					.CLK(CLK),
+					.ENQ(f_init_reqs$ENQ),
+					.DEQ(f_init_reqs$DEQ),
+					.CLR(f_init_reqs$CLR),
+					.FULL_N(f_init_reqs$FULL_N),
+					.EMPTY_N(f_init_reqs$EMPTY_N));
 
-  // submodule f_reset_rsps
-  FIFO20 #(.guarded(32'd1)) f_reset_rsps(.RST(RST_N),
-					 .CLK(CLK),
-					 .ENQ(f_reset_rsps$ENQ),
-					 .DEQ(f_reset_rsps$DEQ),
-					 .CLR(f_reset_rsps$CLR),
-					 .FULL_N(f_reset_rsps$FULL_N),
-					 .EMPTY_N(f_reset_rsps$EMPTY_N));
+  // submodule f_init_rsps
+  FIFO20 #(.guarded(32'd1)) f_init_rsps(.RST(RST_N),
+					.CLK(CLK),
+					.ENQ(f_init_rsps$ENQ),
+					.DEQ(f_init_rsps$DEQ),
+					.CLR(f_init_rsps$CLR),
+					.FULL_N(f_init_rsps$FULL_N),
+					.EMPTY_N(f_init_rsps$EMPTY_N));
 
   // submodule llc
   mkLLCache llc(.CLK(CLK),
@@ -3642,6 +3633,11 @@ module mkProc(CLK,
   assign CAN_FIRE_RL_rl_dummy20 = core_0$RDY_renameDebug_renameErr_get ;
   assign WILL_FIRE_RL_rl_dummy20 = core_0$RDY_renameDebug_renameErr_get ;
 
+  // rule RL_rl_init_finish
+  assign CAN_FIRE_RL_rl_init_finish =
+	     core_0$RDY_init_server_response_get && f_init_rsps$FULL_N ;
+  assign WILL_FIRE_RL_rl_init_finish = CAN_FIRE_RL_rl_init_finish ;
+
   // rule RL_rl_terminate
   assign CAN_FIRE_RL_rl_terminate = core_0$RDY_coreIndInv_terminate ;
   assign WILL_FIRE_RL_rl_terminate = core_0$RDY_coreIndInv_terminate ;
@@ -4079,9 +4075,10 @@ module mkProc(CLK,
   assign WILL_FIRE_RL_llc_axi4_adapter_rl_discard_write_rsp =
 	     CAN_FIRE_RL_llc_axi4_adapter_rl_discard_write_rsp ;
 
-  // rule RL_rl_reset
-  assign CAN_FIRE_RL_rl_reset = f_reset_reqs$EMPTY_N && f_reset_rsps$FULL_N ;
-  assign WILL_FIRE_RL_rl_reset = CAN_FIRE_RL_rl_reset ;
+  // rule RL_rl_init_start
+  assign CAN_FIRE_RL_rl_init_start =
+	     core_0$RDY_init_server_request_put && f_init_reqs$EMPTY_N ;
+  assign WILL_FIRE_RL_rl_init_start = CAN_FIRE_RL_rl_init_start ;
 
   // inputs to muxes for submodule ports
   assign MUX_core_0$mmioToPlatform_pRq_enq_1__SEL_1 =
@@ -4518,7 +4515,7 @@ module mkProc(CLK,
 	       mmio_axi4_adapter_ctr_wr_rsps_pending_crg$port1__write_1 :
 	       b__h2359 ;
   assign mmio_axi4_adapter_ctr_wr_rsps_pending_crg$port3__read =
-	     CAN_FIRE_RL_rl_reset ?
+	     CAN_FIRE_RL_rl_init_start ?
 	       4'd0 :
 	       mmio_axi4_adapter_ctr_wr_rsps_pending_crg$port2__read ;
   assign llc_axi4_adapter_master_xactor_crg_wr_addr_full$EN_port1__write =
@@ -4575,7 +4572,7 @@ module mkProc(CLK,
 	       llc_axi4_adapter_ctr_wr_rsps_pending_crg$port1__write_1 :
 	       b__h123570 ;
   assign llc_axi4_adapter_ctr_wr_rsps_pending_crg$port3__read =
-	     CAN_FIRE_RL_rl_reset ?
+	     CAN_FIRE_RL_rl_init_start ?
 	       4'd0 :
 	       llc_axi4_adapter_ctr_wr_rsps_pending_crg$port2__read ;
 
@@ -5252,11 +5249,12 @@ module mkProc(CLK,
   end
   assign core_0$mmioToPlatform_setTime_t = mmioPlatform_mtime ;
   assign core_0$recvDoStats_x = core_0$sendDoStats ;
-  assign core_0$setDEIP_v = debug_external_interrupt_req_set_not_clear ;
   assign core_0$setMEIP_v = m_external_interrupt_req_set_not_clear ;
   assign core_0$setSEIP_v = s_external_interrupt_req_set_not_clear ;
   assign core_0$tlbToMem_respLd_enq_x =
 	     { ld_data__h121714, llc$dma_respLd_first[3] } ;
+  assign core_0$EN_init_server_request_put = CAN_FIRE_RL_rl_init_start ;
+  assign core_0$EN_init_server_response_get = CAN_FIRE_RL_rl_init_finish ;
   assign core_0$EN_coreReq_start = EN_start ;
   assign core_0$EN_coreReq_perfReq = 1'b0 ;
   assign core_0$EN_coreIndInv_perfResp = 1'b0 ;
@@ -5337,7 +5335,6 @@ module mkProc(CLK,
 	     core_0$RDY_renameDebug_renameErr_get ;
   assign core_0$EN_setMEIP = 1'd1 ;
   assign core_0$EN_setSEIP = 1'd1 ;
-  assign core_0$EN_setDEIP = 1'd1 ;
   assign core_0$EN_hart0_run_halt_server_request_put =
 	     EN_hart0_run_halt_server_request_put ;
   assign core_0$EN_hart0_run_halt_server_response_get =
@@ -5375,15 +5372,17 @@ module mkProc(CLK,
   assign enqDst_1_0_dummy2_1$D_IN = 1'd1 ;
   assign enqDst_1_0_dummy2_1$EN = CAN_FIRE_RL_doEnq_1 ;
 
-  // submodule f_reset_reqs
-  assign f_reset_reqs$ENQ = EN_hart0_server_reset_request_put ;
-  assign f_reset_reqs$DEQ = CAN_FIRE_RL_rl_reset ;
-  assign f_reset_reqs$CLR = 1'b0 ;
+  // submodule f_init_reqs
+  assign f_init_reqs$ENQ = EN_init_server_request_put ;
+  assign f_init_reqs$DEQ =
+	     core_0$RDY_init_server_request_put && f_init_reqs$EMPTY_N ;
+  assign f_init_reqs$CLR = 1'b0 ;
 
-  // submodule f_reset_rsps
-  assign f_reset_rsps$ENQ = CAN_FIRE_RL_rl_reset ;
-  assign f_reset_rsps$DEQ = EN_hart0_server_reset_response_get ;
-  assign f_reset_rsps$CLR = 1'b0 ;
+  // submodule f_init_rsps
+  assign f_init_rsps$ENQ =
+	     core_0$RDY_init_server_response_get && f_init_rsps$FULL_N ;
+  assign f_init_rsps$DEQ = EN_init_server_response_get ;
+  assign f_init_rsps$CLR = 1'b0 ;
 
   // submodule llc
   always@(MUX_llc$dma_memReq_enq_1__SEL_1 or
@@ -5792,6 +5791,15 @@ module mkProc(CLK,
 				    .amoExec_upper_32_bits(mmioPlatform_reqBE_BIT_4___h27604 &&
 							   !mmioPlatform_reqBE_BIT_0___h27644),
 				    .amoExec(x__h38432));
+  module_amoExec instance_amoExec_1(.amoExec_amo_inst({ mmioPlatform_reqFunc[3:0],
+							mmioPlatform_reqBE_BIT_4___h27604 &&
+							mmioPlatform_reqBE_BIT_0___h27644,
+							2'd0 }),
+				    .amoExec_current_data(mmioPlatform_mtime__h34750),
+				    .amoExec_in_data(mmioPlatform_reqData__h46171),
+				    .amoExec_upper_32_bits(mmioPlatform_reqBE_BIT_4___h27604 &&
+							   !mmioPlatform_reqBE_BIT_0___h27644),
+				    .amoExec(x__h32538));
   module_amoExec instance_amoExec_0(.amoExec_amo_inst({ mmioPlatform_reqFunc[3:0],
 							mmioPlatform_reqBE_BIT_4___h27604 &&
 							mmioPlatform_reqBE_BIT_0___h27644,
@@ -5810,15 +5818,6 @@ module mkProc(CLK,
 				    .amoExec_upper_32_bits(mmioPlatform_reqBE_BIT_4___h27604 &&
 							   !mmioPlatform_reqBE_BIT_0___h27644),
 				    .amoExec(x__h40498));
-  module_amoExec instance_amoExec_1(.amoExec_amo_inst({ mmioPlatform_reqFunc[3:0],
-							mmioPlatform_reqBE_BIT_4___h27604 &&
-							mmioPlatform_reqBE_BIT_0___h27644,
-							2'd0 }),
-				    .amoExec_current_data(mmioPlatform_mtime__h34750),
-				    .amoExec_in_data(mmioPlatform_reqData__h46171),
-				    .amoExec_upper_32_bits(mmioPlatform_reqBE_BIT_4___h27604 &&
-							   !mmioPlatform_reqBE_BIT_0___h27644),
-				    .amoExec(x__h32538));
   assign DONTCARE_CONCAT_IF_mmioPlatform_reqFunc_01_BIT_ETC___d645 =
 	     { 1'h0,
 	       (mmioPlatform_reqFunc[5:4] == 2'd2) ?
@@ -6329,7 +6328,7 @@ module mkProc(CLK,
 	     mmioPlatform_waitLowerMSIPCRs ?
 	       { 63'd0, core_0$mmioToPlatform_cRs_first } :
 	       { v__h29229, 32'd0 } ;
-  assign failed_testnum__h152501 =
+  assign failed_testnum__h152647 =
 	     { 1'd0, mmioPlatform_toHostQ_data_0[63:1] } ;
   assign line_addr__h105593 =
 	     { llc_mem_server_axi4_slave_xactor_f_rd_addr$D_OUT[92:35],
@@ -6895,27 +6894,6 @@ module mkProc(CLK,
     endcase
   end
   always@(mmioPlatform_curReq or
-	  result__h45995 or
-	  result__h46023 or result__h46051 or result__h46079)
-  begin
-    case (mmioPlatform_curReq[2:0])
-      3'h0:
-	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
-	      result__h45995;
-      3'h2:
-	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
-	      result__h46023;
-      3'h4:
-	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
-	      result__h46051;
-      3'h6:
-	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
-	      result__h46079;
-      default: IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
-		   64'd0;
-    endcase
-  end
-  always@(mmioPlatform_curReq or
 	  result__h45754 or
 	  result__h45782 or
 	  result__h45810 or
@@ -6948,6 +6926,27 @@ module mkProc(CLK,
       3'h7:
 	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d774 =
 	      result__h45950;
+    endcase
+  end
+  always@(mmioPlatform_curReq or
+	  result__h45995 or
+	  result__h46023 or result__h46051 or result__h46079)
+  begin
+    case (mmioPlatform_curReq[2:0])
+      3'h0:
+	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
+	      result__h45995;
+      3'h2:
+	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
+	      result__h46023;
+      3'h4:
+	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
+	      result__h46051;
+      3'h6:
+	  IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
+	      result__h46079;
+      default: IF_mmioPlatform_curReq_96_BITS_2_TO_0_46_EQ_0x_ETC___d787 =
+		   64'd0;
     endcase
   end
   always@(mmioPlatform_curReq or result__h46120 or result__h46148)
@@ -8060,14 +8059,14 @@ module mkProc(CLK,
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_tohost)
 	begin
-	  v__h152458 = $stime;
+	  v__h152604 = $stime;
 	  #0;
 	end
-    v__h152452 = v__h152458 / 32'd10;
+    v__h152598 = v__h152604 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_tohost)
 	$display("%0d: mmioPlatform.rl_tohost: 0x%0x (= %0d)",
-		 v__h152452,
+		 v__h152598,
 		 mmioPlatform_toHostQ_data_0,
 		 mmioPlatform_toHostQ_data_0);
     if (RST_N != `BSV_RESET_VALUE)
@@ -8077,7 +8076,7 @@ module mkProc(CLK,
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_tohost && mmioPlatform_toHostQ_data_0 != 64'd0 &&
 	  mmioPlatform_toHostQ_data_0[63:1] != 63'd0)
-	$display("FAIL %0d", failed_testnum__h152501);
+	$display("FAIL %0d", failed_testnum__h152647);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_tohost && mmioPlatform_toHostQ_data_0 != 64'd0)
 	$finish(32'd0);

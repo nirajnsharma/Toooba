@@ -77,12 +77,6 @@ interface P3_Core_IFC;
    (* always_ready, always_enabled, prefix="" *)
    method  Action interrupt_reqs ((* port="cpu_external_interrupt_req" *) Bit #(N_External_Interrupt_Sources)  reqs);
 
-   // ----------------
-   // External interrupt [14] to go into Debug Mode
-
-   (* always_ready, always_enabled *)
-   method Action  debug_external_interrupt_req (Bool set_not_clear);
-
 `ifdef INCLUDE_TANDEM_VERIF
    // ----------------------------------------------------------------
    // Optional Tandem Verifier interface.  The data signal is
@@ -223,13 +217,6 @@ module mkP3_Core (P3_Core_IFC);
 	 Bool req_j = unpack (reqs [j]);
 	 corew.core_external_interrupt_sources [j].m_interrupt_req (req_j);
       end
-   endmethod
-
-   // ----------------
-   // External interrupt [14] to go into Debug Mode
-
-   method Action  debug_external_interrupt_req (Bool set_not_clear);
-      corew.debug_external_interrupt_req (set_not_clear);
    endmethod
 
 `ifdef INCLUDE_TANDEM_VERIF

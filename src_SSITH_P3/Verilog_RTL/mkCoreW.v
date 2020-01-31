@@ -119,7 +119,6 @@
 // core_external_interrupt_sources_13_m_interrupt_req_set_not_clear  I     1
 // core_external_interrupt_sources_14_m_interrupt_req_set_not_clear  I     1
 // core_external_interrupt_sources_15_m_interrupt_req_set_not_clear  I     1
-// debug_external_interrupt_req_set_not_clear  I     1
 // dm_dmi_read_addr_dm_addr       I     7
 // dm_dmi_write_dm_addr           I     7
 // dm_dmi_write_dm_word           I    32
@@ -353,8 +352,6 @@ module mkCoreW(CLK,
 	       core_external_interrupt_sources_14_m_interrupt_req_set_not_clear,
 
 	       core_external_interrupt_sources_15_m_interrupt_req_set_not_clear,
-
-	       debug_external_interrupt_req_set_not_clear,
 
 	       dm_dmi_read_addr_dm_addr,
 	       EN_dm_dmi_read_addr,
@@ -674,9 +671,6 @@ module mkCoreW(CLK,
   // action method core_external_interrupt_sources_15_m_interrupt_req
   input  core_external_interrupt_sources_15_m_interrupt_req_set_not_clear;
 
-  // action method debug_external_interrupt_req
-  input  debug_external_interrupt_req_set_not_clear;
-
   // action method dm_dmi_read_addr
   input  [6 : 0] dm_dmi_read_addr_dm_addr;
   input  EN_dm_dmi_read_addr;
@@ -979,6 +973,13 @@ module mkCoreW(CLK,
        dm_mem_tap$slave_wlast,
        dm_mem_tap$slave_wready,
        dm_mem_tap$slave_wvalid;
+
+  // ports of submodule f_proc_start
+  wire f_proc_start$CLR,
+       f_proc_start$DEQ,
+       f_proc_start$EMPTY_N,
+       f_proc_start$ENQ,
+       f_proc_start$FULL_N;
 
   // ports of submodule f_reset_reqs
   wire f_reset_reqs$CLR,
@@ -1378,8 +1379,8 @@ module mkCoreW(CLK,
        proc$EN_hart0_put_other_req_put,
        proc$EN_hart0_run_halt_server_request_put,
        proc$EN_hart0_run_halt_server_response_get,
-       proc$EN_hart0_server_reset_request_put,
-       proc$EN_hart0_server_reset_response_get,
+       proc$EN_init_server_request_put,
+       proc$EN_init_server_response_get,
        proc$EN_set_verbosity,
        proc$EN_start,
        proc$EN_v_to_TV_0_get,
@@ -1390,12 +1391,11 @@ module mkCoreW(CLK,
        proc$RDY_hart0_gpr_mem_server_response_get,
        proc$RDY_hart0_run_halt_server_request_put,
        proc$RDY_hart0_run_halt_server_response_get,
-       proc$RDY_hart0_server_reset_request_put,
-       proc$RDY_hart0_server_reset_response_get,
+       proc$RDY_init_server_request_put,
+       proc$RDY_init_server_response_get,
        proc$RDY_start,
        proc$RDY_v_to_TV_0_get,
        proc$RDY_v_to_TV_1_get,
-       proc$debug_external_interrupt_req_set_not_clear,
        proc$debug_module_mem_server_arlock,
        proc$debug_module_mem_server_arready,
        proc$debug_module_mem_server_arvalid,
@@ -1517,6 +1517,7 @@ module mkCoreW(CLK,
        CAN_FIRE_RL_rl_cpu_hart0_reset_complete,
        CAN_FIRE_RL_rl_cpu_hart0_reset_from_dm_start,
        CAN_FIRE_RL_rl_cpu_hart0_reset_from_soc_start,
+       CAN_FIRE_RL_rl_cpu_hart0_reset_proc_start,
        CAN_FIRE_RL_rl_merge_dm_csr_trace_data,
        CAN_FIRE_RL_rl_merge_dm_gpr_trace_data,
        CAN_FIRE_RL_rl_merge_dm_mem_trace_data,
@@ -1577,7 +1578,6 @@ module mkCoreW(CLK,
        CAN_FIRE_cpu_imem_master_m_wready,
        CAN_FIRE_cpu_reset_server_request_put,
        CAN_FIRE_cpu_reset_server_response_get,
-       CAN_FIRE_debug_external_interrupt_req,
        CAN_FIRE_dm_dmi_read_addr,
        CAN_FIRE_dm_dmi_read_data,
        CAN_FIRE_dm_dmi_write,
@@ -1603,6 +1603,7 @@ module mkCoreW(CLK,
        WILL_FIRE_RL_rl_cpu_hart0_reset_complete,
        WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start,
        WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start,
+       WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start,
        WILL_FIRE_RL_rl_merge_dm_csr_trace_data,
        WILL_FIRE_RL_rl_merge_dm_gpr_trace_data,
        WILL_FIRE_RL_rl_merge_dm_mem_trace_data,
@@ -1663,7 +1664,6 @@ module mkCoreW(CLK,
        WILL_FIRE_cpu_imem_master_m_wready,
        WILL_FIRE_cpu_reset_server_request_put,
        WILL_FIRE_cpu_reset_server_response_get,
-       WILL_FIRE_debug_external_interrupt_req,
        WILL_FIRE_dm_dmi_read_addr,
        WILL_FIRE_dm_dmi_read_data,
        WILL_FIRE_dm_dmi_write,
@@ -1674,29 +1674,30 @@ module mkCoreW(CLK,
 
   // declarations used by system tasks
   // synopsys translate_off
-  reg [31 : 0] v__h7205;
-  reg [31 : 0] v__h7403;
-  reg [31 : 0] v__h7674;
-  reg [31 : 0] v__h7199;
-  reg [31 : 0] v__h7397;
-  reg [31 : 0] v__h7668;
+  reg [31 : 0] v__h7885;
+  reg [31 : 0] v__h7196;
+  reg [31 : 0] v__h7392;
+  reg [31 : 0] v__h7767;
+  reg [31 : 0] v__h7190;
+  reg [31 : 0] v__h7386;
+  reg [31 : 0] v__h7761;
+  reg [31 : 0] v__h7879;
   // synopsys translate_on
 
   // remaining internal signals
-  reg [63 : 0] x__h5725, x__h6650;
+  reg [63 : 0] x__h5717, x__h6642;
   reg [11 : 0] CASE_procv_to_TV_0_get_BITS_153_TO_142_1_proc_ETC__q1,
-	       CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q5;
-  reg [4 : 0] CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9,
-	      CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10,
-	      x1_avValue_rd__h5432,
-	      x1_avValue_rd__h6363;
+	       CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q7;
+  reg [4 : 0] CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5,
+	      CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6,
+	      x1_avValue_rd__h5424,
+	      x1_avValue_rd__h6355;
   reg [3 : 0] CASE_procv_to_TV_0_get_BITS_139_TO_136_0_proc_ETC__q2,
 	      CASE_procv_to_TV_0_get_BITS_139_TO_136_0_proc_ETC__q3,
-	      CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q6,
-	      CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q7;
+	      CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q8,
+	      CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q9;
   reg [1 : 0] CASE_procv_to_TV_0_get_BITS_71_TO_70_0_procv_ETC__q4,
-	      CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q8;
-  wire tv_encode_RDY_reset__07_AND_proc_RDY_hart0_ser_ETC___d113;
+	      CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q10;
 
   // action method set_verbosity
   assign RDY_set_verbosity = 1'd1 ;
@@ -1998,10 +1999,6 @@ module mkCoreW(CLK,
   assign CAN_FIRE_core_external_interrupt_sources_15_m_interrupt_req = 1'd1 ;
   assign WILL_FIRE_core_external_interrupt_sources_15_m_interrupt_req = 1'd1 ;
 
-  // action method debug_external_interrupt_req
-  assign CAN_FIRE_debug_external_interrupt_req = 1'd1 ;
-  assign WILL_FIRE_debug_external_interrupt_req = 1'd1 ;
-
   // action method dm_dmi_read_addr
   assign RDY_dm_dmi_read_addr = debug_module$RDY_dmi_read_addr ;
   assign CAN_FIRE_dm_dmi_read_addr = debug_module$RDY_dmi_read_addr ;
@@ -2240,6 +2237,15 @@ module mkCoreW(CLK,
 			  .master_rready(dm_mem_tap$master_rready),
 			  .trace_data_out_get(dm_mem_tap$trace_data_out_get),
 			  .RDY_trace_data_out_get(dm_mem_tap$RDY_trace_data_out_get));
+
+  // submodule f_proc_start
+  FIFO20 #(.guarded(32'd1)) f_proc_start(.RST(RST_N),
+					 .CLK(CLK),
+					 .ENQ(f_proc_start$ENQ),
+					 .DEQ(f_proc_start$DEQ),
+					 .CLR(f_proc_start$CLR),
+					 .FULL_N(f_proc_start$FULL_N),
+					 .EMPTY_N(f_proc_start$EMPTY_N));
 
   // submodule f_reset_reqs
   FIFO20 #(.guarded(32'd1)) f_reset_reqs(.RST(RST_N),
@@ -2557,7 +2563,6 @@ module mkCoreW(CLK,
   // submodule proc
   mkProc proc(.CLK(CLK),
 	      .RST_N(RST_N),
-	      .debug_external_interrupt_req_set_not_clear(proc$debug_external_interrupt_req_set_not_clear),
 	      .debug_module_mem_server_araddr(proc$debug_module_mem_server_araddr),
 	      .debug_module_mem_server_arburst(proc$debug_module_mem_server_arburst),
 	      .debug_module_mem_server_arcache(proc$debug_module_mem_server_arcache),
@@ -2621,8 +2626,8 @@ module mkCoreW(CLK,
 	      .start_fromhostAddr(proc$start_fromhostAddr),
 	      .start_startpc(proc$start_startpc),
 	      .start_tohostAddr(proc$start_tohostAddr),
-	      .EN_hart0_server_reset_request_put(proc$EN_hart0_server_reset_request_put),
-	      .EN_hart0_server_reset_response_get(proc$EN_hart0_server_reset_response_get),
+	      .EN_init_server_request_put(proc$EN_init_server_request_put),
+	      .EN_init_server_response_get(proc$EN_init_server_response_get),
 	      .EN_start(proc$EN_start),
 	      .EN_set_verbosity(proc$EN_set_verbosity),
 	      .EN_hart0_run_halt_server_request_put(proc$EN_hart0_run_halt_server_request_put),
@@ -2636,8 +2641,8 @@ module mkCoreW(CLK,
 	      .EN_hart0_put_other_req_put(proc$EN_hart0_put_other_req_put),
 	      .EN_v_to_TV_0_get(proc$EN_v_to_TV_0_get),
 	      .EN_v_to_TV_1_get(proc$EN_v_to_TV_1_get),
-	      .RDY_hart0_server_reset_request_put(proc$RDY_hart0_server_reset_request_put),
-	      .RDY_hart0_server_reset_response_get(proc$RDY_hart0_server_reset_response_get),
+	      .RDY_init_server_request_put(proc$RDY_init_server_request_put),
+	      .RDY_init_server_response_get(proc$RDY_init_server_response_get),
 	      .RDY_start(proc$RDY_start),
 	      .master0_awvalid(proc$master0_awvalid),
 	      .master0_awid(proc$master0_awid),
@@ -2834,6 +2839,12 @@ module mkCoreW(CLK,
 								.D_OUT(v_td2_to_td_1_f_out$D_OUT),
 								.FULL_N(v_td2_to_td_1_f_out$FULL_N),
 								.EMPTY_N(v_td2_to_td_1_f_out$EMPTY_N));
+
+  // rule RL_rl_cpu_hart0_reset_proc_start
+  assign CAN_FIRE_RL_rl_cpu_hart0_reset_proc_start =
+	     proc$RDY_start && f_proc_start$EMPTY_N ;
+  assign WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start =
+	     CAN_FIRE_RL_rl_cpu_hart0_reset_proc_start ;
 
   // rule RL_ClientServerRequest
   assign CAN_FIRE_RL_ClientServerRequest =
@@ -3045,7 +3056,10 @@ module mkCoreW(CLK,
   // rule RL_rl_cpu_hart0_reset_from_soc_start
   assign CAN_FIRE_RL_rl_cpu_hart0_reset_from_soc_start =
 	     plic$RDY_server_reset_request_put && fabric_2x3$RDY_reset &&
-	     tv_encode_RDY_reset__07_AND_proc_RDY_hart0_ser_ETC___d113 ;
+	     tv_encode$RDY_reset &&
+	     proc$RDY_init_server_request_put &&
+	     f_reset_reqs$EMPTY_N &&
+	     f_reset_requestor$FULL_N ;
   assign WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start =
 	     CAN_FIRE_RL_rl_cpu_hart0_reset_from_soc_start ;
 
@@ -3054,7 +3068,7 @@ module mkCoreW(CLK,
 	     plic$RDY_server_reset_request_put && fabric_2x3$RDY_reset &&
 	     tv_encode$RDY_reset &&
 	     debug_module$RDY_hart0_get_reset_req_get &&
-	     proc$RDY_hart0_server_reset_request_put &&
+	     proc$RDY_init_server_request_put &&
 	     f_reset_requestor$FULL_N ;
   assign WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start =
 	     CAN_FIRE_RL_rl_cpu_hart0_reset_from_dm_start &&
@@ -3062,9 +3076,10 @@ module mkCoreW(CLK,
 
   // rule RL_rl_cpu_hart0_reset_complete
   assign CAN_FIRE_RL_rl_cpu_hart0_reset_complete =
-	     plic$RDY_server_reset_response_get && proc$RDY_start &&
-	     proc$RDY_hart0_server_reset_response_get &&
+	     plic$RDY_server_reset_response_get &&
+	     proc$RDY_init_server_response_get &&
 	     f_reset_requestor$EMPTY_N &&
+	     f_proc_start$FULL_N &&
 	     (!f_reset_requestor$D_OUT || f_reset_rsps$FULL_N) ;
   assign WILL_FIRE_RL_rl_cpu_hart0_reset_complete =
 	     CAN_FIRE_RL_rl_cpu_hart0_reset_complete ;
@@ -3232,11 +3247,14 @@ module mkCoreW(CLK,
   assign dm_mem_tap$EN_trace_data_out_get =
 	     WILL_FIRE_RL_rl_merge_dm_mem_trace_data ;
 
+  // submodule f_proc_start
+  assign f_proc_start$ENQ = CAN_FIRE_RL_rl_cpu_hart0_reset_complete ;
+  assign f_proc_start$DEQ = CAN_FIRE_RL_rl_cpu_hart0_reset_proc_start ;
+  assign f_proc_start$CLR = 1'b0 ;
+
   // submodule f_reset_reqs
   assign f_reset_reqs$ENQ = EN_cpu_reset_server_request_put ;
-  assign f_reset_reqs$DEQ =
-	     plic$RDY_server_reset_request_put && fabric_2x3$RDY_reset &&
-	     tv_encode_RDY_reset__07_AND_proc_RDY_hart0_ser_ETC___d113 ;
+  assign f_reset_reqs$DEQ = CAN_FIRE_RL_rl_cpu_hart0_reset_from_soc_start ;
   assign f_reset_reqs$CLR = 1'b0 ;
 
   // submodule f_reset_requestor
@@ -3433,8 +3451,6 @@ module mkCoreW(CLK,
   assign plic$EN_set_addr_map = CAN_FIRE_RL_rl_cpu_hart0_reset_complete ;
 
   // submodule proc
-  assign proc$debug_external_interrupt_req_set_not_clear =
-	     debug_external_interrupt_req_set_not_clear ;
   assign proc$debug_module_mem_server_araddr =
 	     fabric_2x3$v_to_slaves_2_araddr ;
   assign proc$debug_module_mem_server_arburst =
@@ -3522,12 +3538,12 @@ module mkCoreW(CLK,
   assign proc$start_fromhostAddr = rg_fromhost_addr ;
   assign proc$start_startpc = 64'h0000000070000000 ;
   assign proc$start_tohostAddr = rg_tohost_addr ;
-  assign proc$EN_hart0_server_reset_request_put =
+  assign proc$EN_init_server_request_put =
 	     WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start ||
 	     WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start ;
-  assign proc$EN_hart0_server_reset_response_get =
+  assign proc$EN_init_server_response_get =
 	     CAN_FIRE_RL_rl_cpu_hart0_reset_complete ;
-  assign proc$EN_start = CAN_FIRE_RL_rl_cpu_hart0_reset_complete ;
+  assign proc$EN_start = CAN_FIRE_RL_rl_cpu_hart0_reset_proc_start ;
   assign proc$EN_set_verbosity = EN_set_verbosity ;
   assign proc$EN_hart0_run_halt_server_request_put =
 	     CAN_FIRE_RL_ClientServerRequest ;
@@ -3608,12 +3624,12 @@ module mkCoreW(CLK,
   // submodule v_td2_to_td_0_f_out
   assign v_td2_to_td_0_f_out$D_IN =
 	     { v_td2_to_td_0_f_in$D_OUT[319:256],
-	       CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9,
+	       CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5,
 	       v_td2_to_td_0_f_in$D_OUT[255:192],
 	       v_td2_to_td_0_f_in$D_OUT[161:160] == 2'b11,
 	       v_td2_to_td_0_f_in$D_OUT[191:160],
-	       x1_avValue_rd__h5432,
-	       x__h5725,
+	       x1_avValue_rd__h5424,
+	       x__h5717,
 	       256'h000000000000000000000000000000000000000000000000AAAAAAAAAAAAAAAA } ;
   assign v_td2_to_td_0_f_out$ENQ = CAN_FIRE_RL_v_td2_to_td_0_rl_xform ;
   assign v_td2_to_td_0_f_out$DEQ = CAN_FIRE_RL_mkConnectionGetPut_2 ;
@@ -3623,17 +3639,17 @@ module mkCoreW(CLK,
   assign v_td2_to_td_1_f_in$D_IN =
 	     { proc$v_to_TV_1_get[319:154],
 	       proc$v_to_TV_1_get[154] ?
-		 CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q5 :
+		 CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q7 :
 		 12'hAAA,
 	       proc$v_to_TV_1_get[141],
 	       proc$v_to_TV_1_get[141] ?
 		 { proc$v_to_TV_1_get[140],
 		   proc$v_to_TV_1_get[140] ?
-		     CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q6 :
-		     CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q7 } :
+		     CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q8 :
+		     CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q9 } :
 		 5'h0A,
 	       proc$v_to_TV_1_get[135:72],
-	       CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q8,
+	       CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q10,
 	       proc$v_to_TV_1_get[69:0] } ;
   assign v_td2_to_td_1_f_in$ENQ = CAN_FIRE_RL_mkConnectionGetPut_3 ;
   assign v_td2_to_td_1_f_in$DEQ = CAN_FIRE_RL_v_td2_to_td_1_rl_xform ;
@@ -3642,48 +3658,44 @@ module mkCoreW(CLK,
   // submodule v_td2_to_td_1_f_out
   assign v_td2_to_td_1_f_out$D_IN =
 	     { v_td2_to_td_1_f_in$D_OUT[319:256],
-	       CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10,
+	       CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6,
 	       v_td2_to_td_1_f_in$D_OUT[255:192],
 	       v_td2_to_td_1_f_in$D_OUT[161:160] == 2'b11,
 	       v_td2_to_td_1_f_in$D_OUT[191:160],
-	       x1_avValue_rd__h6363,
-	       x__h6650,
+	       x1_avValue_rd__h6355,
+	       x__h6642,
 	       256'h000000000000000000000000000000000000000000000000AAAAAAAAAAAAAAAA } ;
   assign v_td2_to_td_1_f_out$ENQ = CAN_FIRE_RL_v_td2_to_td_1_rl_xform ;
   assign v_td2_to_td_1_f_out$DEQ = CAN_FIRE_RL_mkConnectionGetPut_4 ;
   assign v_td2_to_td_1_f_out$CLR = 1'b0 ;
 
   // remaining internal signals
-  assign tv_encode_RDY_reset__07_AND_proc_RDY_hart0_ser_ETC___d113 =
-	     tv_encode$RDY_reset && proc$RDY_hart0_server_reset_request_put &&
-	     f_reset_reqs$EMPTY_N &&
-	     f_reset_requestor$FULL_N ;
   always@(v_td2_to_td_0_f_in$D_OUT)
   begin
     case (v_td2_to_td_0_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h5432 = 5'd0;
-      default: x1_avValue_rd__h5432 = 5'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h5424 = 5'd0;
+      default: x1_avValue_rd__h5424 = 5'd0;
     endcase
   end
   always@(v_td2_to_td_0_f_in$D_OUT)
   begin
     case (v_td2_to_td_0_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x__h5725 = 64'd0;
-      default: x__h5725 = 64'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x__h5717 = 64'd0;
+      default: x__h5717 = 64'd0;
     endcase
   end
   always@(v_td2_to_td_1_f_in$D_OUT)
   begin
     case (v_td2_to_td_1_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h6363 = 5'd0;
-      default: x1_avValue_rd__h6363 = 5'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x__h6642 = 64'd0;
+      default: x__h6642 = 64'd0;
     endcase
   end
   always@(v_td2_to_td_1_f_in$D_OUT)
   begin
     case (v_td2_to_td_1_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x__h6650 = 64'd0;
-      default: x__h6650 = 64'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h6355 = 5'd0;
+      default: x1_avValue_rd__h6355 = 5'd0;
     endcase
   end
   always@(proc$v_to_TV_0_get)
@@ -3774,6 +3786,30 @@ module mkCoreW(CLK,
       default: CASE_procv_to_TV_0_get_BITS_71_TO_70_0_procv_ETC__q4 = 2'd2;
     endcase
   end
+  always@(v_td2_to_td_0_f_in$D_OUT)
+  begin
+    case (v_td2_to_td_0_f_in$D_OUT[159:155])
+      5'd2, 5'd6, 5'd7:
+	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5 = 5'd13;
+      5'd3, 5'd8, 5'd9, 5'd11:
+	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5 = 5'd6;
+      5'd10, 5'd14, 5'd15, 5'd16, 5'd17, 5'd18, 5'd19, 5'd20:
+	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5 = 5'd5;
+      default: CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5 = 5'd6;
+    endcase
+  end
+  always@(v_td2_to_td_1_f_in$D_OUT)
+  begin
+    case (v_td2_to_td_1_f_in$D_OUT[159:155])
+      5'd2, 5'd6, 5'd7:
+	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6 = 5'd13;
+      5'd3, 5'd8, 5'd9, 5'd11:
+	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6 = 5'd6;
+      5'd10, 5'd14, 5'd15, 5'd16, 5'd17, 5'd18, 5'd19, 5'd20:
+	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6 = 5'd5;
+      default: CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6 = 5'd6;
+    endcase
+  end
   always@(proc$v_to_TV_1_get)
   begin
     case (proc$v_to_TV_1_get[153:142])
@@ -3817,9 +3853,9 @@ module mkCoreW(CLK,
       12'd3858,
       12'd3859,
       12'd3860:
-	  CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q5 =
+	  CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q7 =
 	      proc$v_to_TV_1_get[153:142];
-      default: CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q5 =
+      default: CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q7 =
 		   12'd2303;
     endcase
   end
@@ -3827,9 +3863,9 @@ module mkCoreW(CLK,
   begin
     case (proc$v_to_TV_1_get[139:136])
       4'd0, 4'd1, 4'd3, 4'd4, 4'd5, 4'd7, 4'd8, 4'd9, 4'd11, 4'd14:
-	  CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q6 =
+	  CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q8 =
 	      proc$v_to_TV_1_get[139:136];
-      default: CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q6 = 4'd15;
+      default: CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q8 = 4'd15;
     endcase
   end
   always@(proc$v_to_TV_1_get)
@@ -3848,42 +3884,18 @@ module mkCoreW(CLK,
       4'd11,
       4'd12,
       4'd13:
-	  CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q7 =
+	  CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q9 =
 	      proc$v_to_TV_1_get[139:136];
-      default: CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q7 = 4'd15;
+      default: CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q9 = 4'd15;
     endcase
   end
   always@(proc$v_to_TV_1_get)
   begin
     case (proc$v_to_TV_1_get[71:70])
       2'd0, 2'd1:
-	  CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q8 =
+	  CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q10 =
 	      proc$v_to_TV_1_get[71:70];
-      default: CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q8 = 2'd2;
-    endcase
-  end
-  always@(v_td2_to_td_0_f_in$D_OUT)
-  begin
-    case (v_td2_to_td_0_f_in$D_OUT[159:155])
-      5'd2, 5'd6, 5'd7:
-	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9 = 5'd13;
-      5'd3, 5'd8, 5'd9, 5'd11:
-	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9 = 5'd6;
-      5'd10, 5'd14, 5'd15, 5'd16, 5'd17, 5'd18, 5'd19, 5'd20:
-	  CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9 = 5'd5;
-      default: CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q9 = 5'd6;
-    endcase
-  end
-  always@(v_td2_to_td_1_f_in$D_OUT)
-  begin
-    case (v_td2_to_td_1_f_in$D_OUT[159:155])
-      5'd2, 5'd6, 5'd7:
-	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10 = 5'd13;
-      5'd3, 5'd8, 5'd9, 5'd11:
-	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10 = 5'd6;
-      5'd10, 5'd14, 5'd15, 5'd16, 5'd17, 5'd18, 5'd19, 5'd20:
-	  CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10 = 5'd5;
-      default: CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q10 = 5'd6;
+      default: CASE_procv_to_TV_1_get_BITS_71_TO_70_0_procv_ETC__q10 = 2'd2;
     endcase
   end
 
@@ -3923,36 +3935,51 @@ module mkCoreW(CLK,
   begin
     #0;
     if (RST_N != `BSV_RESET_VALUE)
-      if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start)
+      if (WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start)
 	begin
-	  v__h7205 = $stime;
+	  v__h7885 = $stime;
 	  #0;
 	end
-    v__h7199 = v__h7205 / 32'd10;
+    v__h7879 = v__h7885 / 32'd10;
+    if (RST_N != `BSV_RESET_VALUE)
+      if (WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start)
+	$display("%0d: Core.rl_cpu_hart0_reset_proc_start; started running proc",
+		 v__h7879);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start)
-	$display("%0d: Core.rl_cpu_hart0_reset_from_soc_start", v__h7199);
+	begin
+	  v__h7196 = $stime;
+	  #0;
+	end
+    v__h7190 = v__h7196 / 32'd10;
+    if (RST_N != `BSV_RESET_VALUE)
+      if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start)
+	$display("%0d: Core.rl_cpu_hart0_reset_from_soc_start (requestor %0d)",
+		 v__h7190,
+		 1'd1);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start)
 	begin
-	  v__h7403 = $stime;
+	  v__h7392 = $stime;
 	  #0;
 	end
-    v__h7397 = v__h7403 / 32'd10;
+    v__h7386 = v__h7392 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start)
-	$display("%0d: Core.rl_cpu_hart0_reset_from_dm_start", v__h7397);
+	$display("%0d: Core.rl_cpu_hart0_reset_from_dm_start (requestor %0d)",
+		 v__h7386,
+		 1'd0);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_complete)
 	begin
-	  v__h7674 = $stime;
+	  v__h7767 = $stime;
 	  #0;
 	end
-    v__h7668 = v__h7674 / 32'd10;
+    v__h7761 = v__h7767 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_complete)
-	$display("%0d: Core.rl_cpu_hart0_reset_complete; started running proc",
-		 v__h7668);
+	$display("%0d: Core.rl_cpu_hart0_reset_complete; starting proc",
+		 v__h7761);
   end
   // synopsys translate_on
 endmodule  // mkCoreW

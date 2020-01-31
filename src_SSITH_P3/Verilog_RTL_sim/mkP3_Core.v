@@ -97,7 +97,6 @@
 // master1_rresp                  I     2 reg
 // master1_rlast                  I     1 reg
 // cpu_external_interrupt_req     I    16
-// debug_external_interrupt_req_set_not_clear  I     1
 // tv_verifier_info_tx_tready     I     1
 // jtag_tdi                       I     1
 // jtag_tms                       I     1
@@ -273,8 +272,6 @@ module mkP3_Core(CLK,
 		 master1_rready,
 
 		 cpu_external_interrupt_req,
-
-		 debug_external_interrupt_req_set_not_clear,
 
 		 tv_verifier_info_tx_tvalid,
 
@@ -531,9 +528,6 @@ module mkP3_Core(CLK,
 
   // action method interrupt_reqs
   input  [15 : 0] cpu_external_interrupt_req;
-
-  // action method debug_external_interrupt_req
-  input  debug_external_interrupt_req_set_not_clear;
 
   // value method tv_verifier_info_tx_m_tvalid
   output tv_verifier_info_tx_tvalid;
@@ -792,8 +786,7 @@ module mkP3_Core(CLK,
        corew$cpu_imem_master_rvalid,
        corew$cpu_imem_master_wlast,
        corew$cpu_imem_master_wready,
-       corew$cpu_imem_master_wvalid,
-       corew$debug_external_interrupt_req_set_not_clear;
+       corew$cpu_imem_master_wvalid;
 
   // ports of submodule jtagtap
   wire [31 : 0] jtagtap$dmi_req_data, jtagtap$dmi_rsp_data;
@@ -841,7 +834,6 @@ module mkP3_Core(CLK,
        CAN_FIRE_RL_rl_ndmreset,
        CAN_FIRE_RL_rl_once,
        CAN_FIRE_RL_rl_reset_response,
-       CAN_FIRE_debug_external_interrupt_req,
        CAN_FIRE_interrupt_reqs,
        CAN_FIRE_jtag_tclk,
        CAN_FIRE_jtag_tdi,
@@ -879,7 +871,6 @@ module mkP3_Core(CLK,
        WILL_FIRE_RL_rl_ndmreset,
        WILL_FIRE_RL_rl_once,
        WILL_FIRE_RL_rl_reset_response,
-       WILL_FIRE_debug_external_interrupt_req,
        WILL_FIRE_interrupt_reqs,
        WILL_FIRE_jtag_tclk,
        WILL_FIRE_jtag_tdi,
@@ -899,7 +890,7 @@ module mkP3_Core(CLK,
   // inputs to muxes for submodule ports
   wire [33 : 0] MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1,
 		MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2,
-		MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_2,
+		MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_1,
 		MUX_bus_dmi_rsp_fifof_x_wire$wset_1__VAL_1,
 		MUX_bus_dmi_rsp_fifof_x_wire$wset_1__VAL_2;
   wire [1 : 0] MUX_bus_dmi_rsp_fifof_cntr_r$write_1__VAL_2;
@@ -1137,10 +1128,6 @@ module mkP3_Core(CLK,
   assign CAN_FIRE_interrupt_reqs = 1'd1 ;
   assign WILL_FIRE_interrupt_reqs = 1'd1 ;
 
-  // action method debug_external_interrupt_req
-  assign CAN_FIRE_debug_external_interrupt_req = 1'd1 ;
-  assign WILL_FIRE_debug_external_interrupt_req = 1'd1 ;
-
   // value method tv_verifier_info_tx_m_tvalid
   assign tv_verifier_info_tx_tvalid = tv_xactor$axi_out_tvalid ;
 
@@ -1227,7 +1214,6 @@ module mkP3_Core(CLK,
 		.cpu_imem_master_rresp(corew$cpu_imem_master_rresp),
 		.cpu_imem_master_rvalid(corew$cpu_imem_master_rvalid),
 		.cpu_imem_master_wready(corew$cpu_imem_master_wready),
-		.debug_external_interrupt_req_set_not_clear(corew$debug_external_interrupt_req_set_not_clear),
 		.dm_dmi_read_addr_dm_addr(corew$dm_dmi_read_addr_dm_addr),
 		.dm_dmi_write_dm_addr(corew$dm_dmi_write_dm_addr),
 		.dm_dmi_write_dm_word(corew$dm_dmi_write_dm_word),
@@ -1458,31 +1444,31 @@ module mkP3_Core(CLK,
 
   // inputs to muxes for submodule ports
   assign MUX_bus_dmi_rsp_fifof_q_0$write_1__SEL_1 =
+	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo3 ;
+  assign MUX_bus_dmi_rsp_fifof_q_0$write_1__SEL_2 =
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_incCtr &&
 	     bus_dmi_rsp_fifof_cntr_r == 2'd0 ;
-  assign MUX_bus_dmi_rsp_fifof_q_0$write_1__SEL_2 =
-	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo3 ;
   assign MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_1 =
+	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo1 ;
+  assign MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_2 =
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_incCtr &&
 	     bus_dmi_rsp_fifof_cntr_r == 2'd1 ;
-  assign MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_2 =
-	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo1 ;
   assign MUX_bus_dmi_rsp_fifof_x_wire$wset_1__SEL_1 =
 	     WILL_FIRE_RL_rl_dmi_req_cpu &&
 	     bus_dmi_req_fifof$D_OUT[1:0] != 2'd1 ;
   assign MUX_bus_dmi_rsp_fifof_cntr_r$write_1__VAL_2 =
 	     bus_dmi_rsp_fifof_cntr_r + 2'd1 ;
   assign MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1 =
+	     (bus_dmi_rsp_fifof_cntr_r == 2'd1) ?
+	       MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2 :
+	       bus_dmi_rsp_fifof_q_1 ;
+  assign MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2 =
 	     MUX_bus_dmi_rsp_fifof_x_wire$wset_1__SEL_1 ?
 	       MUX_bus_dmi_rsp_fifof_x_wire$wset_1__VAL_1 :
 	       MUX_bus_dmi_rsp_fifof_x_wire$wset_1__VAL_2 ;
-  assign MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2 =
-	     (bus_dmi_rsp_fifof_cntr_r == 2'd1) ?
-	       MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1 :
-	       bus_dmi_rsp_fifof_q_1 ;
-  assign MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_2 =
+  assign MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_1 =
 	     (bus_dmi_rsp_fifof_cntr_r == 2'd2) ?
-	       MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1 :
+	       MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2 :
 	       34'd0 ;
   assign MUX_bus_dmi_rsp_fifof_x_wire$wset_1__VAL_1 =
 	     { 32'hAAAAAAAA,
@@ -1530,25 +1516,25 @@ module mkP3_Core(CLK,
     endcase
   end
   assign bus_dmi_rsp_fifof_q_0$EN =
+	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo3 ||
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_incCtr &&
 	     bus_dmi_rsp_fifof_cntr_r == 2'd0 ||
-	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo3 ||
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_decCtr ;
 
   // register bus_dmi_rsp_fifof_q_1
   always@(MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_1 or
-	  MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1 or
+	  MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_1 or
 	  MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_2 or
-	  MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_2 or
+	  MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2 or
 	  WILL_FIRE_RL_bus_dmi_rsp_fifof_decCtr)
   begin
     case (1'b1) // synopsys parallel_case
       MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_1:
 	  bus_dmi_rsp_fifof_q_1$D_IN =
-	      MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_1;
+	      MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_1;
       MUX_bus_dmi_rsp_fifof_q_1$write_1__SEL_2:
 	  bus_dmi_rsp_fifof_q_1$D_IN =
-	      MUX_bus_dmi_rsp_fifof_q_1$write_1__VAL_2;
+	      MUX_bus_dmi_rsp_fifof_q_0$write_1__VAL_2;
       WILL_FIRE_RL_bus_dmi_rsp_fifof_decCtr:
 	  bus_dmi_rsp_fifof_q_1$D_IN = 34'd0;
       default: bus_dmi_rsp_fifof_q_1$D_IN =
@@ -1556,9 +1542,9 @@ module mkP3_Core(CLK,
     endcase
   end
   assign bus_dmi_rsp_fifof_q_1$EN =
+	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo1 ||
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_incCtr &&
 	     bus_dmi_rsp_fifof_cntr_r == 2'd1 ||
-	     WILL_FIRE_RL_bus_dmi_rsp_fifof_both && _dfoo1 ||
 	     WILL_FIRE_RL_bus_dmi_rsp_fifof_decCtr ;
 
   // register rg_once
@@ -1626,8 +1612,6 @@ module mkP3_Core(CLK,
   assign corew$cpu_imem_master_rresp = master0_rresp ;
   assign corew$cpu_imem_master_rvalid = master0_rvalid ;
   assign corew$cpu_imem_master_wready = master0_wready ;
-  assign corew$debug_external_interrupt_req_set_not_clear =
-	     debug_external_interrupt_req_set_not_clear ;
   assign corew$dm_dmi_read_addr_dm_addr = bus_dmi_req_fifof$D_OUT[40:34] ;
   assign corew$dm_dmi_write_dm_addr = bus_dmi_req_fifof$D_OUT[40:34] ;
   assign corew$dm_dmi_write_dm_word = bus_dmi_req_fifof$D_OUT[33:2] ;
