@@ -1674,24 +1674,24 @@ module mkCoreW(CLK,
 
   // declarations used by system tasks
   // synopsys translate_off
-  reg [31 : 0] v__h7885;
-  reg [31 : 0] v__h7196;
-  reg [31 : 0] v__h7392;
-  reg [31 : 0] v__h7767;
-  reg [31 : 0] v__h7190;
-  reg [31 : 0] v__h7386;
-  reg [31 : 0] v__h7761;
-  reg [31 : 0] v__h7879;
+  reg [31 : 0] v__h7858;
+  reg [31 : 0] v__h7169;
+  reg [31 : 0] v__h7365;
+  reg [31 : 0] v__h7740;
+  reg [31 : 0] v__h7163;
+  reg [31 : 0] v__h7359;
+  reg [31 : 0] v__h7734;
+  reg [31 : 0] v__h7852;
   // synopsys translate_on
 
   // remaining internal signals
-  reg [63 : 0] x__h5717, x__h6642;
+  reg [63 : 0] x__h5690, x__h6615;
   reg [11 : 0] CASE_procv_to_TV_0_get_BITS_153_TO_142_1_proc_ETC__q1,
 	       CASE_procv_to_TV_1_get_BITS_153_TO_142_1_proc_ETC__q7;
   reg [4 : 0] CASE_v_td2_to_td_0_f_inD_OUT_BITS_159_TO_155__ETC__q5,
 	      CASE_v_td2_to_td_1_f_inD_OUT_BITS_159_TO_155__ETC__q6,
-	      x1_avValue_rd__h5424,
-	      x1_avValue_rd__h6355;
+	      x1_avValue_rd__h5397,
+	      x1_avValue_rd__h6328;
   reg [3 : 0] CASE_procv_to_TV_0_get_BITS_139_TO_136_0_proc_ETC__q2,
 	      CASE_procv_to_TV_0_get_BITS_139_TO_136_0_proc_ETC__q3,
 	      CASE_procv_to_TV_1_get_BITS_139_TO_136_0_proc_ETC__q8,
@@ -2768,9 +2768,6 @@ module mkCoreW(CLK,
 		    .m_ddr4_0_cached_addr_base(),
 		    .m_ddr4_0_cached_addr_size(),
 		    .m_ddr4_0_cached_addr_lim(),
-		    .m_mem0_controller_addr_base(),
-		    .m_mem0_controller_addr_size(),
-		    .m_mem0_controller_addr_lim(),
 		    .m_is_mem_addr(),
 		    .m_is_IO_addr(),
 		    .m_is_near_mem_IO_addr(),
@@ -3628,8 +3625,8 @@ module mkCoreW(CLK,
 	       v_td2_to_td_0_f_in$D_OUT[255:192],
 	       v_td2_to_td_0_f_in$D_OUT[161:160] == 2'b11,
 	       v_td2_to_td_0_f_in$D_OUT[191:160],
-	       x1_avValue_rd__h5424,
-	       x__h5717,
+	       x1_avValue_rd__h5397,
+	       x__h5690,
 	       256'h000000000000000000000000000000000000000000000000AAAAAAAAAAAAAAAA } ;
   assign v_td2_to_td_0_f_out$ENQ = CAN_FIRE_RL_v_td2_to_td_0_rl_xform ;
   assign v_td2_to_td_0_f_out$DEQ = CAN_FIRE_RL_mkConnectionGetPut_2 ;
@@ -3662,8 +3659,8 @@ module mkCoreW(CLK,
 	       v_td2_to_td_1_f_in$D_OUT[255:192],
 	       v_td2_to_td_1_f_in$D_OUT[161:160] == 2'b11,
 	       v_td2_to_td_1_f_in$D_OUT[191:160],
-	       x1_avValue_rd__h6355,
-	       x__h6642,
+	       x1_avValue_rd__h6328,
+	       x__h6615,
 	       256'h000000000000000000000000000000000000000000000000AAAAAAAAAAAAAAAA } ;
   assign v_td2_to_td_1_f_out$ENQ = CAN_FIRE_RL_v_td2_to_td_1_rl_xform ;
   assign v_td2_to_td_1_f_out$DEQ = CAN_FIRE_RL_mkConnectionGetPut_4 ;
@@ -3673,29 +3670,29 @@ module mkCoreW(CLK,
   always@(v_td2_to_td_0_f_in$D_OUT)
   begin
     case (v_td2_to_td_0_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h5424 = 5'd0;
-      default: x1_avValue_rd__h5424 = 5'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h5397 = 5'd0;
+      default: x1_avValue_rd__h5397 = 5'd0;
     endcase
   end
   always@(v_td2_to_td_0_f_in$D_OUT)
   begin
     case (v_td2_to_td_0_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x__h5717 = 64'd0;
-      default: x__h5717 = 64'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x__h5690 = 64'd0;
+      default: x__h5690 = 64'd0;
     endcase
   end
   always@(v_td2_to_td_1_f_in$D_OUT)
   begin
     case (v_td2_to_td_1_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x__h6642 = 64'd0;
-      default: x__h6642 = 64'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x__h6615 = 64'd0;
+      default: x__h6615 = 64'd0;
     endcase
   end
   always@(v_td2_to_td_1_f_in$D_OUT)
   begin
     case (v_td2_to_td_1_f_in$D_OUT[159:155])
-      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h6355 = 5'd0;
-      default: x1_avValue_rd__h6355 = 5'd0;
+      5'd3, 5'd8, 5'd9, 5'd11: x1_avValue_rd__h6328 = 5'd0;
+      default: x1_avValue_rd__h6328 = 5'd0;
     endcase
   end
   always@(proc$v_to_TV_0_get)
@@ -3937,49 +3934,49 @@ module mkCoreW(CLK,
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start)
 	begin
-	  v__h7885 = $stime;
+	  v__h7858 = $stime;
 	  #0;
 	end
-    v__h7879 = v__h7885 / 32'd10;
+    v__h7852 = v__h7858 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_proc_start)
 	$display("%0d: Core.rl_cpu_hart0_reset_proc_start; started running proc",
-		 v__h7879);
+		 v__h7852);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start)
 	begin
-	  v__h7196 = $stime;
+	  v__h7169 = $stime;
 	  #0;
 	end
-    v__h7190 = v__h7196 / 32'd10;
+    v__h7163 = v__h7169 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_soc_start)
 	$display("%0d: Core.rl_cpu_hart0_reset_from_soc_start (requestor %0d)",
-		 v__h7190,
+		 v__h7163,
 		 1'd1);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start)
 	begin
-	  v__h7392 = $stime;
+	  v__h7365 = $stime;
 	  #0;
 	end
-    v__h7386 = v__h7392 / 32'd10;
+    v__h7359 = v__h7365 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_from_dm_start)
 	$display("%0d: Core.rl_cpu_hart0_reset_from_dm_start (requestor %0d)",
-		 v__h7386,
+		 v__h7359,
 		 1'd0);
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_complete)
 	begin
-	  v__h7767 = $stime;
+	  v__h7740 = $stime;
 	  #0;
 	end
-    v__h7761 = v__h7767 / 32'd10;
+    v__h7734 = v__h7740 / 32'd10;
     if (RST_N != `BSV_RESET_VALUE)
       if (WILL_FIRE_RL_rl_cpu_hart0_reset_complete)
 	$display("%0d: Core.rl_cpu_hart0_reset_complete; starting proc",
-		 v__h7761);
+		 v__h7734);
   end
   // synopsys translate_on
 endmodule  // mkCoreW
